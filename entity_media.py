@@ -38,16 +38,19 @@ COUNTRY_FLAGS = {
     "netherlands": "nl",
 }
 
-# Words that are capitalized but aren't people/teams — skip these as photo candidates
 GENERIC_WORDS = {
     "the", "a", "an", "in", "on", "at", "for", "from", "to", "of", "and", "vs",
     "test", "series", "match", "world", "cup", "asian", "games", "cricket",
     "first", "second", "third", "time", "since", "after", "before", "day",
-    "odi", "t20", "t20i", "ipl", "bcci", "icc", "squad", "team", "captain",
+    "odi", "odis", "t20", "t20i", "t20is", "ipl", "bcci", "icc", "squad",
+    "team", "captain",
 }
 
 REQUEST_TIMEOUT = 20
-HEADERS = {"User-Agent": "CricketNewsBot/1.0 (https://github.com/)"}
+HEADERS = {
+    "User-Agent": "CricketNewsBot/1.0 (https://github.com/; contact: cricketnewsbot@example.com)",
+    "Accept": "application/json",
+}
 MAX_CANDIDATES_TO_TRY = 4
 
 
@@ -56,11 +59,7 @@ def _ensure_cache_dir():
 
 
 def find_country(text):
-    """
-    Returns a flagcdn ISO code if a cricket-playing country is named.
-    If multiple countries appear, the one mentioned earliest in the text wins
-    (usually the subject of the headline, e.g. "India beat Australia...").
-    """
+    """Country mentioned earliest in the text wins (usually the subject)."""
     text_lower = text.lower()
     best_name, best_pos = None, None
     for name in COUNTRY_FLAGS:
@@ -76,7 +75,6 @@ def find_country(text):
 
 
 def fetch_flag(iso_code):
-    """Downloads a country flag PNG, returns local path or None on failure."""
     if not iso_code:
         return None
     _ensure_cache_dir()
@@ -98,11 +96,6 @@ def fetch_flag(iso_code):
 
 
 def _extract_candidates(headline):
-    """
-    Pulls out likely person/team names from a headline: sequences of
-    capitalized words, longest first, skipping generic capitalized words
-    and country names (those are handled separately via the flag).
-    """
     text = re.sub(r"[,:()]", " ", headline)
     matches = re.findall(r"\b[A-Z][a-zA-Z.]*(?:\s+[A-Z][a-zA-Z.]*)*\b", text)
 
@@ -126,26 +119,38 @@ def _extract_candidates(headline):
 
 
 def _wiki_summary(query):
-    """Returns (title, thumbnail_url, description) for the best Wikipedia match, or None."""
+    """
+    Returns (title, thumbnail_url, description) for the best Wikipedia
+    match, or None. Uses the newer REST search endpoint (more reliable
+    than the old 'opensearch' action, which some hosts get blocked/
+    rate-limited on).
+    """
     try:
         search_resp = requests.get(
-            "https://en.wikipedia.org/w/api.php",
-            params={
-                "action": "opensearch",
-                "search": query,
-                "limit": 1,
-                "namespace": 0,
-                "format": "json",
-            },
+            "https://en.wikipedia.org/w/rest.php/v1/search/page",
+            params={"q": query, "limit": 1},
             headers=HEADERS,
             timeout=REQUEST_TIMEOUT,
         )
-        search_data = search_resp.json()
-        titles = search_data[1] if len(search_data) > 1 else []
-        if not titles:
+        if search_resp.status_code != 200:
+            print(
+                f"[entity_media] '{query}' -> search status {search_resp.status_code}, "
+                f"body starts: {search_resp.text[:150]!r}"
+            )
+            return None
+
+        try:
+            search_data = search_resp.json()
+        except ValueError:
+            print(f"[entity_media] '{query}' -> search returned non-JSON: {search_resp.text[:150]!r}")
+            return None
+
+        pages = search_data.get("pages", [])
+        if not pages:
             print(f"[entity_media] '{query}' -> no Wikipedia page match")
             return None
-        title = titles[0]
+
+        title = pages[0].get("title") or pages[0].get("key", "").replace("_", " ")
 
         summary_resp = requests.get(
             f"https://en.wikipedia.org/api/rest_v1/page/summary/{requests.utils.quote(title)}",
@@ -153,26 +158,32 @@ def _wiki_summary(query):
             timeout=REQUEST_TIMEOUT,
         )
         if summary_resp.status_code != 200:
-            print(f"[entity_media] '{query}' -> matched '{title}' but summary fetch failed")
+            print(
+                f"[entity_media] '{query}' -> matched '{title}' but summary status "
+                f"{summary_resp.status_code}: {summary_resp.text[:150]!r}"
+            )
             return None
-        summary_data = summary_resp.json()
+
+        try:
+            summary_data = summary_resp.json()
+        except ValueError:
+            print(f"[entity_media] '{query}' -> summary returned non-JSON: {summary_resp.text[:150]!r}")
+            return None
+
         thumbnail = summary_data.get("thumbnail", {}).get("source")
         description = (summary_data.get("description") or "").lower()
-        print(f"[entity_media] '{query}' -> matched '{title}' (desc: '{description}', has_thumb: {bool(thumbnail)})")
+        print(
+            f"[entity_media] '{query}' -> matched '{title}' "
+            f"(desc: '{description}', has_thumb: {bool(thumbnail)})"
+        )
         return title, thumbnail, description
 
-    except (requests.RequestException, ValueError, KeyError, IndexError) as e:
-        print(f"[entity_media] '{query}' -> lookup failed: {e}")
+    except requests.RequestException as e:
+        print(f"[entity_media] '{query}' -> request failed: {e}")
         return None
 
 
 def fetch_player_photo(headline, story_id):
-    """
-    Tries to find a real photo related to the headline via Wikipedia's
-    free REST API. Tries each likely name candidate from the headline,
-    preferring ones that Wikipedia describes as a cricketer/player.
-    Returns a local image path, or None if nothing usable was found.
-    """
     if not config.ENABLE_PLAYER_PHOTO:
         return None
 
@@ -187,7 +198,6 @@ def fetch_player_photo(headline, story_id):
     print(f"[entity_media] name candidates: {candidates}")
 
     person_keywords = ("cricketer", "cricket player", "batter", "batsman", "bowler", "all-rounder", "wicket-keeper")
-
     best_fallback = None
 
     for query in candidates:
@@ -221,7 +231,4 @@ def _download_image(url, local_path):
                 f.write(img_resp.content)
             print(f"[entity_media] saved photo to {local_path}")
             return local_path
-        print(f"[entity_media] image download failed: status {img_resp.status_code}")
-    except requests.RequestException as e:
-        print(f"[entity_media] image download failed: {e}")
-    return None
+        print(f"[entity_m
