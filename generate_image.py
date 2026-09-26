@@ -69,9 +69,11 @@ def _draw_template(story, width, height, headline_font_size, tag_font_size):
 
     draw = ImageDraw.Draw(img)
 
+    # Accent bar at the top
     bar_h = max(14, int(height * 0.013))
     draw.rectangle([(0, 0), (width, bar_h)], fill=config.ACCENT_COLOR)
 
+    # Category tag
     tag_font = _load_font(config.FONT_BOLD_PATH, tag_font_size)
     tag_text = "CRICKET NEWS"
     tag_bbox = draw.textbbox((0, 0), tag_text, font=tag_font)
@@ -84,9 +86,11 @@ def _draw_template(story, width, height, headline_font_size, tag_font_size):
     )
     draw.text((60 + pad_x, tag_top + pad_y - tag_bbox[1]), tag_text, font=tag_font, fill=(0, 0, 0))
 
+    # Optional real photo (player/team) fetched from Wikipedia
     photo_path = None
     if config.ENABLE_PLAYER_PHOTO:
         photo_path = fetch_player_photo(story["title"], story["id"])
+        print(f"[generate_image] photo_path = {photo_path}")
 
     photo_size = int(width * 0.42)
     photo_top = tag_top + tag_bbox[3] + pad_y * 2 + 40
@@ -96,8 +100,9 @@ def _draw_template(story, width, height, headline_font_size, tag_font_size):
             photo_x = width - photo_size - 60
             img.paste(rounded, (photo_x, photo_top), rounded)
         else:
-            photo_path = None
+            photo_path = None  # failed to open, fall back to full-width text
 
+    # Headline — narrower if a photo is showing, so text never overlaps it
     headline_font = _load_font(config.FONT_BOLD_PATH, headline_font_size)
     max_text_width = (width - 140 - photo_size - 40) if photo_path else (width - 140)
     max_text_width = max(max_text_width, int(width * 0.4))
@@ -110,9 +115,11 @@ def _draw_template(story, width, height, headline_font_size, tag_font_size):
         bbox = draw.textbbox((0, 0), line, font=headline_font)
         y += (bbox[3] - bbox[1]) + int(headline_font_size * 0.3)
 
+    # Country flag badge (top-right corner), if a nation is named
     if config.ENABLE_COUNTRY_FLAG:
         iso = find_country(story["title"])
         flag_path = fetch_flag(iso) if iso else None
+        print(f"[generate_image] flag_path = {flag_path}")
         if flag_path and os.path.exists(flag_path):
             try:
                 flag_img = Image.open(flag_path).convert("RGBA")
@@ -120,15 +127,17 @@ def _draw_template(story, width, height, headline_font_size, tag_font_size):
                 ratio = flag_img.height / flag_img.width
                 flag_img = flag_img.resize((flag_w, int(flag_w * ratio)))
                 img.paste(flag_img, (width - flag_w - 60, int(bar_h + 30)), flag_img)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"[generate_image] failed to paste flag: {e}")
 
+    # Logo (bottom-left), if provided
     if os.path.exists(config.LOGO_PATH):
         logo = Image.open(config.LOGO_PATH).convert("RGBA")
         logo_size = int(width * 0.15)
         logo.thumbnail((logo_size, logo_size))
         img.paste(logo, (60, height - int(height * 0.16)), logo)
 
+    # Footer / page handle
     footer_font = _load_font(config.FONT_REGULAR_PATH, int(width * 0.033))
     draw.text(
         (60, height - int(height * 0.045)),
