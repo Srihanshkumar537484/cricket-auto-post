@@ -100,7 +100,7 @@ def _draw_template(story, width, height, headline_font_size, tag_font_size):
             photo_x = width - photo_size - 60
             img.paste(rounded, (photo_x, photo_top), rounded)
         else:
-            photo_path = None  # failed to open, fall back to full-width text
+            photo_path = None
 
     # Headline — narrower if a photo is showing, so text never overlaps it
     headline_font = _load_font(config.FONT_BOLD_PATH, headline_font_size)
@@ -115,7 +115,8 @@ def _draw_template(story, width, height, headline_font_size, tag_font_size):
         bbox = draw.textbbox((0, 0), line, font=headline_font)
         y += (bbox[3] - bbox[1]) + int(headline_font_size * 0.3)
 
-    # Country flag badge (top-right corner), if a nation is named
+    # Country flag badge (top-right corner), if a nation is named — drawn with
+    # a white card behind it so it's clearly visible against any background
     if config.ENABLE_COUNTRY_FLAG:
         iso = find_country(story["title"])
         flag_path = fetch_flag(iso) if iso else None
@@ -123,10 +124,22 @@ def _draw_template(story, width, height, headline_font_size, tag_font_size):
         if flag_path and os.path.exists(flag_path):
             try:
                 flag_img = Image.open(flag_path).convert("RGBA")
-                flag_w = int(width * 0.12)
+                flag_w = int(width * 0.20)
                 ratio = flag_img.height / flag_img.width
-                flag_img = flag_img.resize((flag_w, int(flag_w * ratio)))
-                img.paste(flag_img, (width - flag_w - 60, int(bar_h + 30)), flag_img)
+                flag_h = int(flag_w * ratio)
+                flag_img = flag_img.resize((flag_w, flag_h))
+
+                card_pad = 16
+                card_x0 = width - flag_w - 60 - card_pad
+                card_y0 = int(bar_h + 24)
+                card_x1 = width - 60 + card_pad
+                card_y1 = card_y0 + flag_h + card_pad * 2
+                draw.rounded_rectangle(
+                    [(card_x0, card_y0), (card_x1, card_y1)],
+                    radius=12,
+                    fill=(255, 255, 255, 255),
+                )
+                img.paste(flag_img, (width - flag_w - 60, card_y0 + card_pad), flag_img)
             except Exception as e:
                 print(f"[generate_image] failed to paste flag: {e}")
 
