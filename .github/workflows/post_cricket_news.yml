@@ -2,12 +2,11 @@ name: Post Cricket News to Instagram
 
 on:
   schedule:
-    # Runs every 4 hours (UTC). Adjust as you like — cron is in UTC, not IST.
     - cron: "0 */4 * * *"
-  workflow_dispatch: {}   # lets you trigger it manually from the Actions tab
+  workflow_dispatch: {}
 
 permissions:
-  contents: write   # needed so the workflow can commit generated images back
+  contents: write
 
 jobs:
   post-news:
@@ -24,13 +23,12 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      # STEP 1: fetch news + build the template images locally
-      - name: Generate images for new stories
+      - name: Ensure ffmpeg is available (for reels)
+        run: sudo apt-get update -y && sudo apt-get install -y ffmpeg
+
+      - name: Generate images and reels for new stories
         run: python main.py generate
 
-      # STEP 2: push the new images to GitHub FIRST, so they become
-      # publicly reachable at raw.githubusercontent.com before we ask
-      # Instagram to fetch them.
       - name: Commit and push generated images
         run: |
           git config user.name "cricket-news-bot"
@@ -39,7 +37,6 @@ jobs:
           git diff --staged --quiet || git commit -m "Auto: generate cricket news image [skip ci]"
           git push
 
-      # STEP 3: now that images are live, publish them to Instagram
       - name: Publish to Instagram
         env:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
@@ -47,7 +44,6 @@ jobs:
           PUBLIC_RAW_BASE_URL: https://raw.githubusercontent.com/${{ github.repository }}/main/generated
         run: python main.py publish
 
-      # STEP 4: commit the updated posted_log.json so we never repeat a story
       - name: Commit posted log
         run: |
           git add data/posted_log.json data/pending.json
