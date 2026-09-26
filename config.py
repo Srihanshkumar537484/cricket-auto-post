@@ -33,14 +33,26 @@ TEXT_COLOR = (255, 255, 255)         # white headline text
 FOOTER_TEXT_COLOR = (180, 180, 180)
 
 # Fonts: put .ttf files inside assets/fonts/ and reference them here.
-# DejaVuSans ships with most systems as a safe fallback.
 FONT_BOLD_PATH = "assets/fonts/DejaVuSans-Bold.ttf"
 FONT_REGULAR_PATH = "assets/fonts/DejaVuSans.ttf"
 
 LOGO_PATH = "assets/logo.png"          # your page logo, put a transparent PNG here
 BACKGROUND_IMAGE_PATH = "assets/background.jpg"  # optional custom background image
 
-PAGE_HANDLE = "@your_cricket_page"     # shown in the footer of every post
+PAGE_HANDLE = "@crickimasala"          # shown in the footer of every post
+
+# Auto-fetch a player photo / country flag related to the story (free, no key)
+ENABLE_PLAYER_PHOTO = True     # tries Wikipedia for a real photo of the player/team named in the headline
+ENABLE_COUNTRY_FLAG = True     # overlays a small flag badge if a cricket-playing country is named
+PHOTO_CACHE_DIR = "cache/media"
+
+# ---------------------------------------------------------------------------
+# REEL (video) SETTINGS
+# ---------------------------------------------------------------------------
+ENABLE_REELS = True
+REEL_WIDTH = 1080
+REEL_HEIGHT = 1920           # 9:16 portrait, required for Reels
+REEL_DURATION_SECONDS = 7
 
 # ---------------------------------------------------------------------------
 # OUTPUT / STATE
@@ -57,5 +69,4 @@ GRAPH_API_VERSION = "v21.0"
 
 # Public base URL where generated images become reachable after being
 # committed & pushed to the repo (GitHub raw content URL).
-# Example: https://raw.githubusercontent.com/<user>/<repo>/main/generated
 PUBLIC_RAW_BASE_URL = os.environ.get("PUBLIC_RAW_BASE_URL", "")
