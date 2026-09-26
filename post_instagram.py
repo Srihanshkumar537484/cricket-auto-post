@@ -1,16 +1,5 @@
 """
-Publishes an image to Instagram using the Instagram Graph API.
-
-Requirements (one-time setup, see README.md):
-  - Instagram account must be a Business or Creator account
-  - It must be linked to a Facebook Page
-  - You need a long-lived access token with instagram_content_publish permission
-  - IG_USER_ID and IG_ACCESS_TOKEN must be set as environment variables
-    (in GitHub Actions these come from repository secrets)
-
-The image must be reachable at a public URL. This project generates the
-image, the GitHub Action commits it to the repo, and PUBLIC_RAW_BASE_URL
-(raw.githubusercontent.com link) is used as the public URL.
+Publishes content to Instagram using the Instagram Graph API.
 """
 
 import time
@@ -28,19 +17,13 @@ def _graph_url(path):
 
 
 def post_image(image_public_url, caption):
-    """
-    Two-step Graph API flow:
-      1. Create a media container pointing at the public image URL
-      2. Publish that container
-    Returns the published media ID.
-    """
+    """Feed post: two-step Graph API flow (create container, then publish)."""
     if not config.IG_USER_ID or not config.IG_ACCESS_TOKEN:
         raise InstagramPostError(
             "IG_USER_ID / IG_ACCESS_TOKEN not set. Add them as GitHub Actions secrets "
             "or in your local .env file."
         )
 
-    # Step 1: create container
     container_resp = requests.post(
         _graph_url(f"{config.IG_USER_ID}/media"),
         data={
@@ -55,11 +38,8 @@ def post_image(image_public_url, caption):
         raise InstagramPostError(f"Container creation failed: {container_data}")
 
     creation_id = container_data["id"]
-
-    # Small delay so Instagram has time to process the container
     time.sleep(5)
 
-    # Step 2: publish container
     publish_resp = requests.post(
         _graph_url(f"{config.IG_USER_ID}/media_publish"),
         data={
@@ -75,7 +55,72 @@ def post_image(image_public_url, caption):
     return publish_data["id"]
 
 
+def post_reel(video_public_url, caption, max_wait_seconds=180, poll_interval=8):
+    """
+    Reel post: create a REELS container pointing at the public video URL,
+    poll until Instagram finishes processing it, then publish.
+    """
+    if not config.IG_USER_ID or not config.IG_ACCESS_TOKEN:
+        raise InstagramPostError(
+            "IG_USER_ID / IG_ACCESS_TOKEN not set. Add them as GitHub Actions secrets "
+            "or in your local .env file."
+        )
+
+    container_resp = requests.post(
+        _graph_url(f"{config.IG_USER_ID}/media"),
+        data={
+            "media_type": "REELS",
+            "video_url": video_public_url,
+            "caption": caption,
+            "access_token": config.IG_ACCESS_TOKEN,
+        },
+        timeout=30,
+    )
+    container_data = container_resp.json()
+    if "id" not in container_data:
+        raise InstagramPostError(f"Reel container creation failed: {container_data}")
+
+    creation_id = container_data["id"]
+
+    waited = 0
+    status = None
+    while waited < max_wait_seconds:
+        time.sleep(poll_interval)
+        waited += poll_interval
+        status_resp = requests.get(
+            _graph_url(creation_id),
+            params={"fields": "status_code", "access_token": config.IG_ACCESS_TOKEN},
+            timeout=30,
+        )
+        status_data = status_resp.json()
+        status = status_data.get("status_code")
+        if status == "FINISHED":
+            break
+        if status == "ERROR":
+            raise InstagramPostError(f"Reel processing failed: {status_data}")
+
+    if status != "FINISHED":
+        raise InstagramPostError(
+            f"Reel still processing after {max_wait_seconds}s (status: {status}). "
+            "It may still publish later — check the Instagram app."
+        )
+
+    publish_resp = requests.post(
+        _graph_url(f"{config.IG_USER_ID}/media_publish"),
+        data={
+            "creation_id": creation_id,
+            "access_token": config.IG_ACCESS_TOKEN,
+        },
+        timeout=30,
+    )
+    publish_data = publish_resp.json()
+    if "id" not in publish_data:
+        raise InstagramPostError(f"Reel publishing failed: {publish_data}")
+
+    return publish_data["id"]
+
+
 def build_caption(story):
-    hashtags = "#cricket #cricketnews #ipl #india #cricketfan"
+    hashtags = "#cricket #cricketnews #ipl #india #cricketfan #crickimasala"
     link_line = f"\n\nFull story: {story['link']}" if story.get("link") else ""
     return f"{story['title']}{link_line}\n\n{hashtags}"
