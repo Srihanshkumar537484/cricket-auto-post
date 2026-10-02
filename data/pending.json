@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "id": "https://www.cricinfo.com/ci/content/story/1556952.html",
+    "title": "Sammy: 'Results have not gone our way, but we continue to improve'",
+    "link": "https://www.cricinfo.com/ci/content/story/1556952.html?ex_cid=OTC-RSS",
+    "image_filename": "tentstory1556952html.jpg",
+    "reel_filename": "tentstory1556952html.mp4"
+  },
+  {
+    "id": "https://www.cricinfo.com/ci/content/story/1556885.html",
+    "title": "MI Emirates bag Farooqi with record bid, Babar heads Vipers' Pakistan contingent",
+    "link": "https://www.cricinfo.com/ci/content/story/1556885.html?ex_cid=OTC-RSS",
+    "image_filename": "tentstory1556885html.jpg",
+    "reel_filename": "tentstory1556885html.mp4"
+  }
+]
