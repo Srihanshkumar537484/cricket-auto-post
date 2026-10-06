@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "id": "https://www.cricinfo.com/ci/content/story/1557352.html",
+    "title": "McSweeney 123, Beardman four-for down India A",
+    "link": "https://www.cricinfo.com/ci/content/story/1557352.html?ex_cid=OTC-RSS",
+    "image_filename": "tentstory1557352html.jpg",
+    "reel_filename": "tentstory1557352html.mp4"
+  },
+  {
+    "id": "https://www.cricinfo.com/ci/content/story/1557339.html",
+    "title": "Smriti Mandhana appointed India captain across formats",
+    "link": "https://www.cricinfo.com/ci/content/story/1557339.html?ex_cid=OTC-RSS",
+    "image_filename": "tentstory1557339html.jpg",
+    "reel_filename": "tentstory1557339html.mp4"
+  }
+]
