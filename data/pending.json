@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "id": "https://www.cricinfo.com/ci/content/story/1559676.html",
+    "title": "Injured Ishan Kishan ruled out of second T20I against New Zealand",
+    "link": "https://www.cricinfo.com/ci/content/story/1559676.html?ex_cid=OTC-RSS",
+    "image_filename": "tentstory1559676html.jpg",
+    "reel_filename": "tentstory1559676html.mp4"
+  },
+  {
+    "id": "https://www.cricinfo.com/ci/content/story/1559723.html",
+    "title": "S Meghana retires from all formats at 30",
+    "link": "https://www.cricinfo.com/ci/content/story/1559723.html?ex_cid=OTC-RSS",
+    "image_filename": "tentstory1559723html.jpg",
+    "reel_filename": "tentstory1559723html.mp4"
+  }
+]
