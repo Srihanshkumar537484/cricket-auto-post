@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "id": "https://www.cricinfo.com/ci/content/story/1559817.html",
+    "title": "'Rescue missions' not the way to go, says Sikandar Raza",
+    "link": "https://www.cricinfo.com/ci/content/story/1559817.html?ex_cid=OTC-RSS",
+    "image_filename": "tentstory1559817html.jpg",
+    "reel_filename": "tentstory1559817html.mp4"
+  },
+  {
+    "id": "https://www.cricinfo.com/ci/content/story/1559811.html",
+    "title": "Pybus lauds Afghanistan's 'very diverse but very competent bowling unit'",
+    "link": "https://www.cricinfo.com/ci/content/story/1559811.html?ex_cid=OTC-RSS",
+    "image_filename": "tentstory1559811html.jpg",
+    "reel_filename": "tentstory1559811html.mp4"
+  }
+]
