@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "id": "https://www.cricinfo.com/ci/content/story/1562059.html",
+    "title": "Cricket Scotland announces reduced relations with Afghanistan",
+    "link": "https://www.cricinfo.com/ci/content/story/1562059.html?ex_cid=OTC-RSS",
+    "image_filename": "tentstory1562059html.jpg",
+    "reel_filename": "tentstory1562059html.mp4"
+  },
+  {
+    "id": "https://www.cricinfo.com/ci/content/story/1562055.html",
+    "title": "Dale Benkenstein appointed Bangladesh's batting specialist ahead of SA tour",
+    "link": "https://www.cricinfo.com/ci/content/story/1562055.html?ex_cid=OTC-RSS",
+    "image_filename": "tentstory1562055html.jpg",
+    "reel_filename": "tentstory1562055html.mp4"
+  }
+]
