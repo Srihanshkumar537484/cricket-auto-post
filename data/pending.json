@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "id": "https://www.cricinfo.com/ci/content/story/1562052.html",
+    "title": "Shanto: Bangladesh failed to make use of home conditions",
+    "link": "https://www.cricinfo.com/ci/content/story/1562052.html?ex_cid=OTC-RSS",
+    "image_filename": "tentstory1562052html.jpg",
+    "reel_filename": "tentstory1562052html.mp4"
+  },
+  {
+    "id": "https://www.cricinfo.com/ci/content/story/1561964.html",
+    "title": "Mushfiqur becomes first Bangladesh batter to score 7000 runs in Tests",
+    "link": "https://www.cricinfo.com/ci/content/story/1561964.html?ex_cid=OTC-RSS",
+    "image_filename": "tentstory1561964html.jpg",
+    "reel_filename": "tentstory1561964html.mp4"
+  }
+]
