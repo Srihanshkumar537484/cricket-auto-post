@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "id": "https://www.cricinfo.com/ci/content/story/1562301.html",
+    "title": "Kevin Malloy elected New Zealand Cricket chair",
+    "link": "https://www.cricinfo.com/ci/content/story/1562301.html?ex_cid=OTC-RSS",
+    "image_filename": "tentstory1562301html.jpg",
+    "reel_filename": "tentstory1562301html.mp4"
+  },
+  {
+    "id": "https://www.cricinfo.com/ci/content/story/1562287.html",
+    "title": "Brett Randell called up to New Zealand ODI squad for final two games against India",
+    "link": "https://www.cricinfo.com/ci/content/story/1562287.html?ex_cid=OTC-RSS",
+    "image_filename": "tentstory1562287html.jpg",
+    "reel_filename": "tentstory1562287html.mp4"
+  }
+]
