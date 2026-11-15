@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "id": "https://www.cricinfo.com/ci/content/story/1562804.html",
+    "title": "ICC scraps Super Six from 2027 World Cup Qualifier",
+    "link": "https://www.cricinfo.com/ci/content/story/1562804.html?ex_cid=OTC-RSS",
+    "image_filename": "tentstory1562804html.jpg",
+    "reel_filename": "tentstory1562804html.mp4"
+  },
+  {
+    "id": "https://www.cricinfo.com/ci/content/story/1562733.html",
+    "title": "Mumbai leg of WPL 2027 moved from Brabourne to Wankhede",
+    "link": "https://www.cricinfo.com/ci/content/story/1562733.html?ex_cid=OTC-RSS",
+    "image_filename": "tentstory1562733html.jpg",
+    "reel_filename": "tentstory1562733html.mp4"
+  }
+]
